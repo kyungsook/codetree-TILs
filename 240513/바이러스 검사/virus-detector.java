@@ -21,13 +21,13 @@ public class Main {
 		int boss = Integer.parseInt(st.nextToken());
 		int sub = Integer.parseInt(st.nextToken());
 		
-		int result = n;
+		long result = n;
 		
 		for(int i=0; i<n; i++) {
 			store[i] -= boss;
 			if(store[i] <= 0) continue;
 			
-			result += (int)(Math.ceil((double)store[i]/sub));
+			result += (long)(Math.ceil((double)store[i]/sub));
 		}
 		
 		System.out.println(result);
