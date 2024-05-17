@@ -106,10 +106,8 @@ public class Main {
 	}
 	
 	public static void copyMonster() {
-		monster.clear();
 		for(int i=0; i<4; i++) {
 			for(int j=0; j<4; j++) {
-				if(isDead[i][j] > 0) continue;
 				for(Integer m : map[i][j]) {
 					monster.add(new Monster(i, j, m));
 				}
@@ -201,6 +199,7 @@ public class Main {
 		for(Monster m : monster) {
 			map[m.x][m.y].add(m.dir);
 		}
+		monster.clear();
 	}
 	
 	public static boolean isRange(int x, int y) {
