@@ -190,7 +190,7 @@ public class Main {
 	public static void removeMonster(int turn) {
 		for(int i=0; i<4; i++) {
 			for(int j=0; j<4; j++) {
-				if(turn - isDead[i][j] == 2) {
+				if(turn - isDead[i][j] > 0) {
 					isDead[i][j] = 0;
 				}
 			}
