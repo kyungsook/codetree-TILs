@@ -43,7 +43,7 @@ public class Main {
 		int t = Integer.parseInt(st.nextToken());
 		
 		st = new StringTokenizer(br.readLine());
-		pacman = new Pacman(Integer.parseInt(st.nextToken()), Integer.parseInt(st.nextToken()));
+		pacman = new Pacman(Integer.parseInt(st.nextToken())-1, Integer.parseInt(st.nextToken())-1);
 		
 		map = new ArrayList[4][4];
 		copyMap = new ArrayList[4][4];
