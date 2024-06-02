@@ -2,8 +2,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.StringTokenizer;
 
 public class Main {
@@ -158,13 +156,21 @@ public class Main {
 			int ny = y + dy[i];
 			
 			// 범위를 벗어나거나 이미 방문했던 곳은 무시
-			if(!isRange(nx, ny) || visited[nx][ny]) continue;
+//			if(!isRange(nx, ny) || visited[nx][ny]) continue;
+			if(!isRange(nx, ny)) continue;
 			
-			visited[nx][ny] = true;
-			dir[cur] = i;
-			findPacmanRoute(cur+1, nx, ny, eat+map[nx][ny].size(), dir);
-			visited[nx][ny] = false;
-			dir[cur] = -1;
+			if(visited[nx][ny]) {
+				dir[cur] = i;
+				findPacmanRoute(cur+1, nx, ny, eat, dir);
+				dir[cur] = -1;
+			} else {
+				visited[nx][ny] = true;
+				dir[cur] = i;
+				findPacmanRoute(cur+1, nx, ny, eat+map[nx][ny].size(), dir);
+				visited[nx][ny] = false;
+				dir[cur] = -1;
+			}
+			
 		}
 	}
 	
