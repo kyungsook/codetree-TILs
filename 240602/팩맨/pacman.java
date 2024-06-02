@@ -185,7 +185,7 @@ public class Main {
 	public static void removeDeadMonster(int turn) {
 		for(int i=0; i<4; i++) {
 			for(int j=0; j<4; j++) {
-				if(isDead[i][j] > 0 && isDead[i][j]+1 == turn) isDead[i][j] = 0;
+				if(isDead[i][j] > 0 && isDead[i][j]+2 == turn) isDead[i][j] = 0;
 			}
 		}
 	}
