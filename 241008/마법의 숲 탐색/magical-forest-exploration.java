@@ -134,7 +134,7 @@ public class Main {
 	}
 	
 	private static boolean isRange(int x, int y) {
-		return 3 <= x && x<= R+1 && 1 <= y && y<=C-2;
+		return 3 < x && x<= R+1 && 1 <= y && y<=C-2;
 	}
 	
 	private static boolean isBfsRange(int x, int y) {
