@@ -6,46 +6,52 @@ import java.util.List;
 import java.util.StringTokenizer;
 
 public class Main {
-
-	static class Data {
-		int x, y;
-
-		public Data(int x, int y) {
-			super();
-			this.x = x;
-			this.y = y;
-		}
-
-		@Override
-		public String toString() {
-			return "Data [x=" + x + ", y=" + y + "]";
-		}
-	}
-	
 	static class Person {
-		int idx;
 		int x, y;
 		int dist;
 		
-		public Person(int idx, int x, int y, int dist) {
+		public Person(int x, int y) {
 			super();
-			this.idx = idx;
 			this.x = x;
 			this.y = y;
-			this.dist = dist;
+			this.dist = 0;
 		}
-		
+
 		@Override
 		public String toString() {
-			return "Person [idx=" + idx + ", x=" + x + ", y=" + y + ", dist=" + dist + "]";
+			return "Person [x=" + x + ", y=" + y + ", dist=" + dist + "]";
+		}
+	}
+	
+	static class Map {
+		List<Integer> pList;
+		int wall;
+		
+		public Map() {
+			this.wall = 0;
+			this.pList = new ArrayList<>();
+		}
+		
+		public Map(int wall) {
+			super();
+			this.wall = wall;
+			this.pList = new ArrayList<>();
+		}
+		
+		public void delete(int idx) {
+			pList.remove(Integer.valueOf(idx));
+		}
+
+		@Override
+		public String toString() {
+			return "Map [pList=" + pList + ", wall=" + wall + "]";
 		}
 	}
 	
 	static int N, M, K;
-	static int[][] map;
-	static List<Person>[][] pMap;
+	static Map[][] map;
 	static Person[] person;
-	static Data exit;
+	static Person exit;
 	static int finCnt;
 	static boolean[] isFinished;
 	static int[] dx = {-1, 1, 0, 0};
@@ -59,23 +65,15 @@ public class Main {
 		M = Integer.parseInt(st.nextToken());
 		K = Integer.parseInt(st.nextToken());
 		
-		map = new int[N][N];
-		pMap = new ArrayList[N][N];
+		map = new Map[N][N];
 		person = new Person[M+1];
 		isFinished = new boolean[M+1];
-		
-		// pMap 초기화
-		for(int i=0; i<N; i++) {
-			for(int j=0; j<N; j++) {
-				pMap[i][j] = new ArrayList<>();
-			}
-		}
 		
 		// map 정보 초기화
 		for(int i=0; i<N; i++) {
 			st = new StringTokenizer(br.readLine());
 			for(int j=0; j<N; j++) {
-				map[i][j] = Integer.parseInt(st.nextToken());
+				map[i][j] = new Map(Integer.parseInt(st.nextToken()));
 			}
 		}
 		
@@ -85,15 +83,15 @@ public class Main {
 			int x = Integer.parseInt(st.nextToken())-1;
 			int y = Integer.parseInt(st.nextToken())-1;
 			
-			person[i] = new Person(i, x, y, 0);
-			pMap[x][y].add(person[i]);
+			person[i] = new Person(x, y);
+			map[x][y].pList.add(i);
 		}
 		
 		// 출구 정보
 		st = new StringTokenizer(br.readLine());
 		int x = Integer.parseInt(st.nextToken())-1;
 		int y = Integer.parseInt(st.nextToken())-1;
-		exit = new Data(x, y);
+		exit = new Person(x, y);
 		
 		for(int turn=0; turn<K; turn++) {
 			// 모든 참가자 1칸씩 움직이기
@@ -120,53 +118,40 @@ public class Main {
 	
 	private static void rotateMaze() {
 		int[] res = getSquare();
-		int xStart = res[0];
-		int yStart = res[1];
+		int x = res[0];
+		int y = res[1];
 		int size = res[2];
 		
-		int[][] newMap = new int[N][N];
-		for(int i=0; i<N; i++) {
-			for(int j=0; j<N; j++) {
-				newMap[i][j] = map[i][j];
-			}
-		}
-		
-		List<Person>[][] newPMap = new ArrayList[N][N];
-		for(int i=0; i<N; i++) {
-			for(int j=0; j<N; j++) {
-				newPMap[i][j] = new ArrayList<>();
-				for(Person p  : pMap[i][j])
-					newPMap[i][j].add(p);
-			}
-		}
-		
 		// maze 회전
-		for(int i=0; i<size; i++) {
-			for(int j=0; j<size; j++) {
-				// 미로 회전, 내구성--
-				map[j+xStart][size-1-i+yStart] = newMap[i+xStart][j+yStart] > 0 ? 
-						newMap[i+xStart][j+yStart]-1 : 0;
-				
-				// pMap 회전
-				pMap[j+xStart][size-1-i+yStart] = newPMap[i+xStart][j+yStart];
+		Map[][] newMap = new Map[N][N];
+		for(int i=x; i<x+size; i++) {
+			for(int j=y; j<y+size; j++) {
+				int ox = i-x, oy = j-y;
+				int rx = oy, ry = size-1-ox;
+				newMap[rx+x][ry+y] = new Map();
+				newMap[rx+x][ry+y].wall = map[i][j].wall > 0 ? map[i][j].wall-1 : 0;
+				copyList(newMap[rx+x][ry+y].pList, map[i][j].pList);
 			}
 		}
 		
 		// people 좌표 바꾸기
-		for(int i=xStart, xLen=xStart+size; i<xLen; i++) {
-			for(int j=yStart, yLen=yStart+size; j<yLen; j++) {
-				for(Person p : pMap[i][j]){
-					p.x = i;
-					p.y = j;
+		for(int i=x; i<x+size; i++) {
+			for(int j=y; j<y+size; j++) {
+				map[i][j].wall = newMap[i][j].wall;
+				copyList(map[i][j].pList, newMap[i][j].pList);
+				// 사람들 좌표 바꾸기
+				for(int idx : map[i][j].pList) {
+					person[idx].x = i;
+					person[idx].y = j;
 				}
 			}
 		}
 		
 		// exit 회전
-		int nx = exit.y - yStart + xStart;
-		int ny = size - 1 - exit.x + xStart + yStart;
-		exit.x = nx;
-		exit.y = ny;
+		int ox = exit.x - x, oy = exit.y - y;
+		int rx = oy, ry = size - ox -1;
+		exit.x = rx+x;
+		exit.y = ry+y;
 	}
 	
 	private static int[] getSquare() {
@@ -181,7 +166,7 @@ public class Main {
 					for(int i=xStart, xMax = xStart+size; i<xMax; i++) {
 						for(int j=yStart, yMax = yStart+size; j<yMax; j++) {
 							if(exit.x == i && exit.y == j) eFlag = true;
-							if(pMap[i][j].size() > 0) pFlag = true;
+							if(map[i][j].pList.size() > 0) pFlag = true;
 						}
 					}
 					if(eFlag && pFlag) {
@@ -198,7 +183,7 @@ public class Main {
 	
 	private static void movePeople(int idx) {
 		Person cur = person[idx];
-		Data d = findNextBlank(cur.x, cur.y);
+		Person d = findNextBlank(cur.x, cur.y);
 		
 		// 움직일 수 없으면 안움직임
 		if(d.x == 0 && d.y == 0) return;
@@ -209,7 +194,7 @@ public class Main {
 		
 		// 만약 이동할 곳이 출구라면 즉시 탈출
 		if(nx == exit.x && ny == exit.y) {
-			pMap[cur.x][cur.y].remove(cur);
+			map[cur.x][cur.y].delete(idx);;
 			isFinished[idx] = true;
 			cur.dist++;
 			finCnt++;
@@ -217,14 +202,14 @@ public class Main {
 		}
 		
 		// 그렇지 않다면 이동
-		pMap[cur.x][cur.y].remove(cur);
+		map[cur.x][cur.y].delete(idx);
 		cur.x = nx;
 		cur.y = ny;
 		cur.dist++;
-		pMap[nx][ny].add(cur);
+		map[cur.x][cur.y].pList.add(idx);
 	}
 	
-	private static Data findNextBlank(int x, int y) {
+	private static Person findNextBlank(int x, int y) {
 		int nx = 0, ny = 0;
 		int curDist = dist(x, y);
 		
@@ -232,7 +217,7 @@ public class Main {
 			int nnx = x + dx[i];
 			int nny = y + dy[i];
 			
-			if(!isRange(nnx, nny) || map[nnx][nny] > 0) continue;
+			if(!isRange(nnx, nny) || map[nnx][nny].wall > 0) continue;
 			int nDist = dist(nnx, nny);
 			if(nDist < curDist) {
 				nx = dx[i];
@@ -241,7 +226,15 @@ public class Main {
 			}
 		}
 		
-		return new Data(nx, ny);
+		return new Person(nx, ny);
+	}
+	
+	private static List<Integer> copyList(List<Integer> dest, List<Integer> src){
+		dest.clear();
+		for(int num : src) {
+			dest.add(num);
+		}
+		return dest;
 	}
 	
 	private static int dist(int x, int y) {
